@@ -1,2 +1,2 @@
 # BiteDB
-Implementation for "Writing Vector DB from Scratch" Blogs
+Bite sized Vector Score written in Rust for Rust
