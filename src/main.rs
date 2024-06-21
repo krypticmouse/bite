@@ -1,4 +1,6 @@
-use bite::traits::Embedder;
+use bite::traits::Index;
+
+use bite::index::knn::FlatIndex;
 use bite::embedder::openai::OpenAI;
 
 #[tokio::main]
@@ -7,10 +9,21 @@ async fn main() {
 
     let embedder = OpenAI::new(
         "text-embedding-ada-002",
-        "secret_key",
+        "secret-api-key",
         32,
     );
 
-    let result = embedder.embed(data).await.unwrap();
-    println!("{:?}", result.data[0].embedding);
+    let mut indexer = FlatIndex {
+        embedder,
+        embeddings: None,
+    };
+
+    indexer.index(data).await;
+
+    let query = "world";
+    let top_k = 1;
+    let metric = "euclidean";
+
+    let results = indexer.search(query, top_k, metric).await;
+    println!("{:?}", results)
 }

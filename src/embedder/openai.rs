@@ -22,7 +22,23 @@ impl OpenAI<'_> {
 }
 
 impl Embedder for OpenAI<'_> {
-    async fn embed(&self, data: Vec<&str>) -> Result<EmbedderResponse, reqwest::Error> {
+    async fn embed(&self, data: &str) -> Result<EmbedderResponse, reqwest::Error> {
+        let client = reqwest::Client::new();
+        let payload = EmbedderPayload::new(vec![data], self.model, self.api_key, self.dimension, Some(self.base_url));
+
+        let response = client.post(self.base_url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .header("Content-Type", "application/json")
+            .json(&payload)
+            .send()
+            .await?;
+
+        let embeddings: EmbedderResponse = response.json::<EmbedderResponse>().await?;
+
+        Ok(embeddings)
+    }
+
+    async fn batch_embed(&self, data: Vec<&str>) -> Result<EmbedderResponse, reqwest::Error> {
         let client = reqwest::Client::new();
         let payload = EmbedderPayload::new(data, self.model, self.api_key, self.dimension, Some(self.base_url));
 
